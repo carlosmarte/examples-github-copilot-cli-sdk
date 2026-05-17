@@ -1,0 +1,66 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+
+# Java / Maven / Gradle
+target/
+build/
+*.class
+*.jar
+*.war
+*.ear
+.gradle/
+hs_err_pid*.log
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+dist/
+build/
+
+# Rust
+target/
+Cargo.lock
+
+# Go
+bin/
+vendor/
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.nupkg
+project.lock.json
+
+# Docker
+*.pid
