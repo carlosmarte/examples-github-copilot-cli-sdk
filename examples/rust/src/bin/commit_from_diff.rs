@@ -5,15 +5,30 @@
 //!
 //! Run: cargo run --bin commit_from_diff
 
-use github_copilot_sdk::{Client, ClientOptions, SessionConfig};
+use github_copilot_sdk::{CliProgram, Client, ClientOptions, SessionConfig};
 use std::process::Command;
+
+fn resolve_copilot_cli() -> std::path::PathBuf {
+    // PATH lookup first
+    if let Ok(path_var) = std::env::var("PATH") {
+        for dir in path_var.split(':') {
+            let candidate = std::path::Path::new(dir).join("copilot");
+            if candidate.is_file() {
+                return candidate;
+            }
+        }
+    }
+    // Fall back to COPILOT_CLI_PATH env var
+    if let Ok(env_path) = std::env::var("COPILOT_CLI_PATH") {
+        if !env_path.is_empty() {
+            return std::path::PathBuf::from(env_path);
+        }
+    }
+    panic!("copilot CLI not found. Install @github/copilot globally or set COPILOT_CLI_PATH.");
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Disable any user-configured MCP servers so this example runs against
-    // the bare SDK surface only.
-    unsafe { std::env::set_var("COPILOT_DISABLE_MCP", "1"); }
-
     let output = Command::new("git").args(["diff", "--cached"]).output()?;
     if !output.status.success() {
         eprintln!("git diff --cached failed (exit {})", output.status);
@@ -36,9 +51,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ]
     .join("\n");
 
-    let client = Client::start(ClientOptions::default()).await?;
+    let opts = ClientOptions::default()
+        .with_program(CliProgram::Path(resolve_copilot_cli()))
+        .with_extra_args(["--disable-builtin-mcps"]);
+    let client = Client::start(opts).await?;
     let mut config = SessionConfig::default();
     config.model = Some("gpt-4.1".to_string());
+    let config = config.approve_all_permissions();
     let session = client.create_session(config).await?;
 
     if let Some(event) = session.send_and_wait(prompt).await? {

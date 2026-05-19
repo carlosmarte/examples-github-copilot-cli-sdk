@@ -7,18 +7,31 @@
 
 import asyncio
 import os
+import shutil
 
-from copilot import CopilotClient
+from copilot import CopilotClient, SubprocessConfig
 from copilot.generated.session_events import AssistantMessageData
 from copilot.session import PermissionHandler
 
-# Disable any user-configured MCP servers so this example runs against the
-# bare SDK surface only.
-os.environ["COPILOT_DISABLE_MCP"] = "1"
+
+def resolve_copilot_cli() -> str:
+    """Resolve the copilot CLI: PATH first, COPILOT_CLI_PATH env as fallback."""
+    path = shutil.which("copilot")
+    if path:
+        return path
+    env_path = os.environ.get("COPILOT_CLI_PATH")
+    if env_path:
+        return env_path
+    raise RuntimeError(
+        "Copilot CLI not found. Install @github/copilot globally or set COPILOT_CLI_PATH."
+    )
 
 
 async def main() -> None:
-    client = CopilotClient()
+    client = CopilotClient(SubprocessConfig(
+        cli_path=resolve_copilot_cli(),
+        cli_args=["--disable-builtin-mcps"],
+    ))
     await client.start()
     try:
         session = await client.create_session(

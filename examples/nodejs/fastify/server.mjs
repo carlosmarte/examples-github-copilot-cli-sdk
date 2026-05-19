@@ -13,21 +13,36 @@
 //   curl -s -X POST localhost:3000/ask -H 'content-type: application/json' \
 //        -d '{"prompt":"What is 2 + 2?"}'
 
+import { createRequire } from "node:module";
 import Fastify from "fastify";
-import { CopilotClient } from "@github/copilot-sdk";
-
-// Disable any user-configured MCP servers so this example runs against the
-// bare SDK surface only.
-process.env.COPILOT_DISABLE_MCP = "1";
+import { CopilotClient, approveAll } from "@github/copilot-sdk";
 
 const PORT = Number(process.env.PORT) || 3000;
 const MODEL = process.env.COPILOT_MODEL || "gpt-4.1";
 
-const client = new CopilotClient();
+// Resolve the @github/copilot CLI relative to this script first, fall back to
+// the COPILOT_CLI_PATH env var. `--disable-builtin-mcps` keeps the example on
+// the bare SDK surface; the env var COPILOT_DISABLE_MCP is not honored.
+function resolveCopilotCli() {
+  try {
+    return createRequire(import.meta.url).resolve("@github/copilot");
+  } catch {
+    if (process.env.COPILOT_CLI_PATH) return process.env.COPILOT_CLI_PATH;
+    throw new Error("Copilot CLI not found. Run `npm install` or set COPILOT_CLI_PATH.");
+  }
+}
+
+const client = new CopilotClient({
+  cliPath: resolveCopilotCli(),
+  cliArgs: ["--disable-builtin-mcps"],
+});
 const app = Fastify({ logger: true });
 
 async function ask(prompt) {
-  const session = await client.createSession({ model: MODEL });
+  const session = await client.createSession({
+    model: MODEL,
+    onPermissionRequest: approveAll,
+  });
   const response = await session.sendAndWait({ prompt });
   return response?.data?.content ?? "";
 }

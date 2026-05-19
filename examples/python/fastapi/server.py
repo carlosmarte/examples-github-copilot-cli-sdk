@@ -15,19 +15,30 @@
 #        -d '{"prompt":"What is 2 + 2?"}'
 
 import os
+import shutil
 from contextlib import asynccontextmanager
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-from copilot import CopilotClient
+from copilot import CopilotClient, SubprocessConfig
 from copilot.generated.session_events import AssistantMessageData
 from copilot.session import PermissionHandler
 
-# Disable any user-configured MCP servers so this example runs against the
-# bare SDK surface only.
-os.environ["COPILOT_DISABLE_MCP"] = "1"
+
+def resolve_copilot_cli() -> str:
+    """Resolve the copilot CLI: PATH first, COPILOT_CLI_PATH env as fallback."""
+    path = shutil.which("copilot")
+    if path:
+        return path
+    env_path = os.environ.get("COPILOT_CLI_PATH")
+    if env_path:
+        return env_path
+    raise RuntimeError(
+        "Copilot CLI not found. Install @github/copilot globally or set COPILOT_CLI_PATH."
+    )
+
 
 MODEL = os.environ.get("COPILOT_MODEL", "gpt-4.1")
 DEFAULT_PROMPT = "What is 2 + 2?"
@@ -44,7 +55,10 @@ class AskResponse(BaseModel):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    client = CopilotClient()
+    client = CopilotClient(SubprocessConfig(
+        cli_path=resolve_copilot_cli(),
+        cli_args=["--disable-builtin-mcps"],
+    ))
     await client.start()
     app.state.copilot = client
     try:

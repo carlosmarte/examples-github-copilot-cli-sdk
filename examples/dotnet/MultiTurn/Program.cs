@@ -7,10 +7,6 @@
 
 using GitHub.Copilot.SDK;
 
-// Disable any user-configured MCP servers so this example runs against the
-// bare SDK surface only.
-Environment.SetEnvironmentVariable("COPILOT_DISABLE_MCP", "1");
-
 string[] turns =
 {
     "Give me a one-line description of the Fibonacci sequence.",
@@ -18,7 +14,11 @@ string[] turns =
     "Add a memoized version below the first one.",
 };
 
-await using var client = new CopilotClient();
+await using var client = new CopilotClient(new CopilotClientOptions
+{
+    CliPath = ResolveCopilotCli(),
+    CliArgs = new[] { "--disable-builtin-mcps" },
+});
 await client.StartAsync();
 
 var session = await client.CreateSessionAsync(new SessionConfig
@@ -35,4 +35,27 @@ foreach (var prompt in turns)
 
     var response = await session.SendAsync(new MessageOptions { Prompt = prompt });
     Console.WriteLine(response?.Data.Content);
+}
+
+static string ResolveCopilotCli()
+{
+    var pathEnv = Environment.GetEnvironmentVariable("PATH");
+    if (pathEnv is not null)
+    {
+        foreach (var dir in pathEnv.Split(Path.PathSeparator))
+        {
+            var candidate = Path.Combine(dir, "copilot");
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+        }
+    }
+    var envOverride = Environment.GetEnvironmentVariable("COPILOT_CLI_PATH");
+    if (!string.IsNullOrEmpty(envOverride))
+    {
+        return envOverride;
+    }
+    throw new InvalidOperationException(
+        "copilot CLI not found. Install @github/copilot globally or set COPILOT_CLI_PATH.");
 }

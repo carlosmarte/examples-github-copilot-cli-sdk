@@ -4,19 +4,14 @@
 // print chunks as they arrive. SessionIdleEvent fires when the response is
 // complete and the session is ready for the next prompt.
 //
-// Run: COPILOT_DISABLE_MCP=1 mvn -q exec:java -Dexec.mainClass=examples.copilot.StreamingDeltas
-//
-// COPILOT_DISABLE_MCP=1 keeps this example on the bare SDK surface — no
-// user-configured MCP servers loaded by the underlying CLI subprocess. The
-// JVM cannot mutate its own environment, so the variable must be exported in
-// the parent shell. The setProperty mirror below is for any SDK code that
-// also consults JVM system properties.
+// Run: mvn -q exec:java -Dexec.mainClass=examples.copilot.StreamingDeltas
 package examples.copilot;
 
 import com.github.copilot.sdk.CopilotClient;
 import com.github.copilot.sdk.CopilotSession;
 import com.github.copilot.sdk.generated.AssistantMessageEvent;
 import com.github.copilot.sdk.generated.SessionIdleEvent;
+import com.github.copilot.sdk.json.CopilotClientOptions;
 import com.github.copilot.sdk.json.MessageOptions;
 import com.github.copilot.sdk.json.PermissionHandler;
 import com.github.copilot.sdk.json.SessionConfig;
@@ -25,9 +20,31 @@ import java.io.Closeable;
 import java.util.concurrent.CountDownLatch;
 
 public final class StreamingDeltas {
+  private static String resolveCopilotCli() {
+      String pathEnv = System.getenv("PATH");
+      if (pathEnv != null) {
+          for (String dir : pathEnv.split(java.io.File.pathSeparator)) {
+              java.io.File candidate = new java.io.File(dir, "copilot");
+              if (candidate.canExecute()) {
+                  return candidate.getAbsolutePath();
+              }
+          }
+      }
+      String envOverride = System.getenv("COPILOT_CLI_PATH");
+      if (envOverride != null && !envOverride.isEmpty()) {
+          return envOverride;
+      }
+      throw new IllegalStateException(
+          "copilot CLI not found. Install @github/copilot globally or set COPILOT_CLI_PATH."
+      );
+  }
+
   public static void main(String[] args) throws Exception {
-    System.setProperty("copilot.disable.mcp", "1");
-    try (CopilotClient client = new CopilotClient()) {
+    try (CopilotClient client = new CopilotClient(
+        new CopilotClientOptions()
+            .setCliPath(resolveCopilotCli())
+            .setCliArgs(new String[]{"--disable-builtin-mcps"})
+    )) {
       client.start().get();
 
       CopilotSession session = client.createSession(

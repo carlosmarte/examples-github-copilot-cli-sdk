@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"os/signal"
 	"sync"
 	"syscall"
@@ -22,12 +23,22 @@ import (
 	copilot "github.com/github/copilot-sdk/go"
 )
 
-func main() {
-	// Disable any user-configured MCP servers so this example runs against
-	// the bare SDK surface only.
-	os.Setenv("COPILOT_DISABLE_MCP", "1")
+func resolveCopilotCli() string {
+	if p, err := exec.LookPath("copilot"); err == nil {
+		return p
+	}
+	if p := os.Getenv("COPILOT_CLI_PATH"); p != "" {
+		return p
+	}
+	log.Fatal("copilot CLI not found. Install @github/copilot globally or set COPILOT_CLI_PATH.")
+	return ""
+}
 
-	client := copilot.NewClient(&copilot.ClientOptions{})
+func main() {
+	client := copilot.NewClient(&copilot.ClientOptions{
+		CLIPath: resolveCopilotCli(),
+		CLIArgs: []string{"--disable-builtin-mcps"},
+	})
 
 	var once sync.Once
 	shutdown := func(code int) {

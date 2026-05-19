@@ -12,11 +12,11 @@
 using System.Runtime.InteropServices;
 using GitHub.Copilot.SDK;
 
-// Disable any user-configured MCP servers so this example runs against the
-// bare SDK surface only.
-Environment.SetEnvironmentVariable("COPILOT_DISABLE_MCP", "1");
-
-var client = new CopilotClient();
+var client = new CopilotClient(new CopilotClientOptions
+{
+    CliPath = ResolveCopilotCli(),
+    CliArgs = new[] { "--disable-builtin-mcps" },
+});
 var stopped = 0;
 
 async Task ShutdownAsync(int code)
@@ -65,4 +65,27 @@ catch (Exception e)
 {
     Console.Error.WriteLine($"session failed: {e.Message}");
     await ShutdownAsync(1);
+}
+
+static string ResolveCopilotCli()
+{
+    var pathEnv = Environment.GetEnvironmentVariable("PATH");
+    if (pathEnv is not null)
+    {
+        foreach (var dir in pathEnv.Split(Path.PathSeparator))
+        {
+            var candidate = Path.Combine(dir, "copilot");
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+        }
+    }
+    var envOverride = Environment.GetEnvironmentVariable("COPILOT_CLI_PATH");
+    if (!string.IsNullOrEmpty(envOverride))
+    {
+        return envOverride;
+    }
+    throw new InvalidOperationException(
+        "copilot CLI not found. Install @github/copilot globally or set COPILOT_CLI_PATH.");
 }
