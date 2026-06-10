@@ -141,6 +141,16 @@ copilot --model claude-sonnet "Refactor this script to use FastAPI" -p
 COPILOT_MODEL=gpt-5-mini copilot -p "Run the test suite and summarize errors"
 ```
 
+The wrapper scripts in this directory read their own `COPILOT_CLI_MODEL` env
+var (defaulting to `gpt-5-mini`) and forward it to the CLI as `--model`. They
+likewise read `COPILOT_CLI_REASONING_EFFORT` (default `low`) and forward it as
+`-r`, so both knobs work everywhere in these examples:
+
+```sh
+COPILOT_CLI_MODEL=claude-sonnet ./one-shot/run.sh "Summarize the last 5 commits"
+COPILOT_CLI_REASONING_EFFORT=high ./one-shot/run.sh "Plan a refactor of this module"
+```
+
 ## Interactive variant (not scripted)
 
 Omit `-p` to launch Copilot into its interactive UI with the prompt as the

@@ -52,7 +52,8 @@ async def main() -> None:
     await client.start()
     try:
         session = await client.create_session(
-            model="gpt-4.1",
+            model=os.environ.get("COPILOT_CLI_MODEL", "gpt-5-mini"),
+            reasoning_effort=os.environ.get("COPILOT_CLI_REASONING_EFFORT", "low"),
             on_permission_request=PermissionHandler.approve_all,
         )
         reply = await session.send_and_wait(prompt)

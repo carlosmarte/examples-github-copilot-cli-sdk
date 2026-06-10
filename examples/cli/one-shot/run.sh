@@ -23,4 +23,4 @@ PROMPT="${1:-What is 2 + 2? Reply with only the digit.}"
 # `--allow-all-tools` (alias `--yolo`) auto-approves any tool the model wants
 # to invoke — drop it if you want interactive permission prompts.
 # `--disable-builtin-mcps` ensures the CLI's bundled MCP servers stay off.
-copilot -p "$PROMPT" --allow-all-tools --disable-builtin-mcps
+copilot --model "${COPILOT_CLI_MODEL:-gpt-5-mini}" -r "${COPILOT_CLI_REASONING_EFFORT:-low}" -p "$PROMPT" --allow-all-tools --disable-builtin-mcps

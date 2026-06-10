@@ -55,7 +55,8 @@ Response shape:
 
 | Env var          | Default   | Purpose                                       |
 | ---------------- | --------- | --------------------------------------------- |
-| `COPILOT_MODEL`  | `gpt-4.1` | Model passed to `client.create_session`       |
+| `COPILOT_CLI_MODEL` | `gpt-5-mini` | Model passed to `client.create_session`     |
+| `COPILOT_CLI_REASONING_EFFORT` | `low` | Reasoning effort (`low`/`medium`/`high`)    |
 
 ## Notes
 

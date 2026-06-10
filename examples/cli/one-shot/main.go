@@ -8,11 +8,13 @@
 // Pattern reference: CLI.md §1.
 //
 // Run:
-//   go run main.go
-//   go run main.go "Summarize the last 5 git commits as a markdown list"
+//
+//	go run main.go
+//	go run main.go "Summarize the last 5 git commits as a markdown list"
 package main
 
 import (
+	"cmp"
 	"errors"
 	"os"
 	"os/exec"
@@ -28,7 +30,7 @@ func main() {
 		prompt = os.Args[1]
 	}
 
-	cmd := exec.Command("copilot", "-p", prompt, "--allow-all-tools", "--disable-builtin-mcps")
+	cmd := exec.Command("copilot", "--model", cmp.Or(os.Getenv("COPILOT_CLI_MODEL"), "gpt-5-mini"), "-r", cmp.Or(os.Getenv("COPILOT_CLI_REASONING_EFFORT"), "low"), "-p", prompt, "--allow-all-tools", "--disable-builtin-mcps")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 

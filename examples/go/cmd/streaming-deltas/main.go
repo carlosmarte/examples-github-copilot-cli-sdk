@@ -7,6 +7,7 @@
 package main
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"log"
@@ -40,7 +41,8 @@ func main() {
 	defer client.Stop()
 
 	session, err := client.CreateSession(ctx, &copilot.SessionConfig{
-		Model:               "gpt-4.1",
+		Model:               cmp.Or(os.Getenv("COPILOT_CLI_MODEL"), "gpt-5-mini"),
+		ReasoningEffort:     cmp.Or(os.Getenv("COPILOT_CLI_REASONING_EFFORT"), "low"),
 		Streaming:           true,
 		OnPermissionRequest: copilot.PermissionHandler.ApproveAll,
 	})

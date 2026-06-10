@@ -3,14 +3,15 @@
 // `client.Stop()` must run on success, on panic/error, and on SIGINT/SIGTERM —
 // otherwise the underlying Copilot CLI subprocess can leak. Three paths,
 // one idempotent shutdown helper:
-//   1. happy path: defer shutdown(0)
-//   2. error:      run() returns code 1, shutdown(1) fires from defer
-//   3. signal:     signal.Notify channel triggers shutdown(130/143)
+//  1. happy path: defer shutdown(0)
+//  2. error:      run() returns code 1, shutdown(1) fires from defer
+//  3. signal:     signal.Notify channel triggers shutdown(130/143)
 //
 // Run: go run ./cmd/graceful-shutdown
 package main
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"log"
@@ -68,7 +69,8 @@ func main() {
 	}
 
 	session, err := client.CreateSession(ctx, &copilot.SessionConfig{
-		Model:               "gpt-4.1",
+		Model:               cmp.Or(os.Getenv("COPILOT_CLI_MODEL"), "gpt-5-mini"),
+		ReasoningEffort:     cmp.Or(os.Getenv("COPILOT_CLI_REASONING_EFFORT"), "low"),
 		OnPermissionRequest: copilot.PermissionHandler.ApproveAll,
 	})
 	if err != nil {

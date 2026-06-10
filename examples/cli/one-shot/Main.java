@@ -17,7 +17,7 @@ public class Main {
             : "What is 2 + 2? Reply with only the digit.";
 
         ProcessBuilder pb = new ProcessBuilder(
-            "copilot", "-p", prompt, "--allow-all-tools", "--disable-builtin-mcps"
+            "copilot", "--model", System.getenv().getOrDefault("COPILOT_CLI_MODEL", "gpt-5-mini"), "-r", System.getenv().getOrDefault("COPILOT_CLI_REASONING_EFFORT", "low"), "-p", prompt, "--allow-all-tools", "--disable-builtin-mcps"
         );
         // Disable any user-configured MCP servers so this example runs against
         // the bare SDK/CLI surface only.

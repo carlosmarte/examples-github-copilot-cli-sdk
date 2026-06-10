@@ -56,7 +56,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::start(opts).await?;
 
     let mut config = SessionConfig::default();
-    config.model = Some("gpt-4.1".to_string());
+    config.model = Some(std::env::var("COPILOT_CLI_MODEL").unwrap_or_else(|_| "gpt-5-mini".to_string()));
     config.streaming = Some(true);
     let config = config.with_handler(Arc::new(StdoutPrinter));
     let config = config.approve_all_permissions();

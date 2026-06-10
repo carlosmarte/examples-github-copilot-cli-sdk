@@ -6,11 +6,13 @@
 // append the user snippet beneath it. Pattern reference: CLI.md §3.
 //
 // Run from this directory so the relative `@./prompts/cleaner.md` resolves:
-//   go run main.go
-//   go run main.go "try { fs.readFile(p); } catch(e) { console.log(e); }"
+//
+//	go run main.go
+//	go run main.go "try { fs.readFile(p); } catch(e) { console.log(e); }"
 package main
 
 import (
+	"cmp"
 	"errors"
 	"fmt"
 	"os"
@@ -45,7 +47,7 @@ func main() {
 		snippet,
 	}, "\n")
 
-	cmd := exec.Command("copilot", "-p", prompt, "--allow-all-tools", "--disable-builtin-mcps")
+	cmd := exec.Command("copilot", "--model", cmp.Or(os.Getenv("COPILOT_CLI_MODEL"), "gpt-5-mini"), "-r", cmp.Or(os.Getenv("COPILOT_CLI_REASONING_EFFORT"), "low"), "-p", prompt, "--allow-all-tools", "--disable-builtin-mcps")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 

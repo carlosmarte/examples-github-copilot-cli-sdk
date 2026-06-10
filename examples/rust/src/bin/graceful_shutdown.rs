@@ -31,7 +31,7 @@ fn resolve_copilot_cli() -> std::path::PathBuf {
 
 async fn run(client: &Client) -> Result<(), Box<dyn std::error::Error>> {
     let mut config = SessionConfig::default();
-    config.model = Some("gpt-4.1".to_string());
+    config.model = Some(std::env::var("COPILOT_CLI_MODEL").unwrap_or_else(|_| "gpt-5-mini".to_string()));
     let config = config.approve_all_permissions();
     let session = client.create_session(config).await?;
 

@@ -28,4 +28,4 @@ PROMPT="@./instructions.md
 
 $USER_PROMPT"
 
-copilot -p "$PROMPT" --allow-all-tools --disable-builtin-mcps
+copilot --model "${COPILOT_CLI_MODEL:-gpt-5-mini}" -r "${COPILOT_CLI_REASONING_EFFORT:-low}" -p "$PROMPT" --allow-all-tools --disable-builtin-mcps

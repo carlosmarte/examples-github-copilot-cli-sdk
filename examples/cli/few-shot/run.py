@@ -43,7 +43,7 @@ def main() -> int:
 
     return subprocess.run([
         "copilot",
-        "-p", prompt,
+        "--model", os.environ.get("COPILOT_CLI_MODEL", "gpt-5-mini"), "-r", os.environ.get("COPILOT_CLI_REASONING_EFFORT", "low"), "-p", prompt,
         "--allow-all-tools",
         "--disable-builtin-mcps",
     ]).returncode

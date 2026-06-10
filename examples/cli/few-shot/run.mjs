@@ -31,7 +31,7 @@ const prompt = [
 
 const child = spawn(
   "copilot",
-  ["-p", prompt, "--allow-all-tools", "--disable-builtin-mcps"],
+  ["--model", process.env.COPILOT_CLI_MODEL || "gpt-5-mini", "-r", process.env.COPILOT_CLI_REASONING_EFFORT || "low", "-p", prompt, "--allow-all-tools", "--disable-builtin-mcps"],
   { stdio: "inherit" },
 );
 

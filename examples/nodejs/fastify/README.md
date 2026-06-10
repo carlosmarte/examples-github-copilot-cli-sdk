@@ -43,7 +43,8 @@ Response shape:
 | Env var          | Default   | Purpose                                |
 | ---------------- | --------- | -------------------------------------- |
 | `PORT`           | `3000`    | HTTP port to listen on                 |
-| `COPILOT_MODEL`  | `gpt-4.1` | Model passed to `client.createSession` |
+| `COPILOT_CLI_MODEL` | `gpt-5-mini` | Model passed to `client.createSession` |
+| `COPILOT_CLI_REASONING_EFFORT` | `low` | Reasoning effort (`low`/`medium`/`high`) |
 
 ## Notes
 

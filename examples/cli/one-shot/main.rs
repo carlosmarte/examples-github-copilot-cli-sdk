@@ -20,9 +20,11 @@ fn main() {
 
     // `COPILOT_DISABLE_MCP=1` plus `--disable-builtin-mcps` keep this example
     // on the bare SDK/CLI surface — no user-configured or bundled MCP servers.
+    let model = std::env::var("COPILOT_CLI_MODEL").unwrap_or_else(|_| "gpt-5-mini".to_string());
+    let effort = std::env::var("COPILOT_CLI_REASONING_EFFORT").unwrap_or_else(|_| "low".to_string());
     let status = match Command::new("copilot")
         .env("COPILOT_DISABLE_MCP", "1")
-        .args(["-p", &prompt, "--allow-all-tools", "--disable-builtin-mcps"])
+        .args(["--model", &model, "-r", &effort, "-p", &prompt, "--allow-all-tools", "--disable-builtin-mcps"])
         .status()
     {
         Ok(s) => s,

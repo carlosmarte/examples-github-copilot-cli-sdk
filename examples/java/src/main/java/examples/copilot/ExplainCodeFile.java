@@ -63,7 +63,8 @@ public final class ExplainCodeFile {
 
       CopilotSession session = client.createSession(
           new SessionConfig()
-              .setModel("gpt-4.1")
+              .setModel(System.getenv().getOrDefault("COPILOT_CLI_MODEL", "gpt-5-mini"))
+              .setReasoningEffort(System.getenv().getOrDefault("COPILOT_CLI_REASONING_EFFORT", "low"))
               .setOnPermissionRequest(PermissionHandler.APPROVE_ALL)
       ).get();
 

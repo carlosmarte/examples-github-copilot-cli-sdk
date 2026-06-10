@@ -40,7 +40,8 @@ process.on("SIGTERM", () => shutdown(143));
 
 try {
   const session = await client.createSession({
-    model: "gpt-4.1",
+    model: process.env.COPILOT_CLI_MODEL || "gpt-5-mini",
+    reasoningEffort: process.env.COPILOT_CLI_REASONING_EFFORT || "low",
     onPermissionRequest: approveAll,
   });
   const response = await session.sendAndWait({

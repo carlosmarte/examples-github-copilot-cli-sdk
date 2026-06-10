@@ -32,7 +32,7 @@ def main() -> int:
 
     prompt = sys.argv[1] if len(sys.argv) > 1 else "What is 2 + 2? Reply with only the digit."
     return subprocess.run(
-        ["copilot", "-p", prompt, "--allow-all-tools", "--disable-builtin-mcps"]
+        ["copilot", "--model", os.environ.get("COPILOT_CLI_MODEL", "gpt-5-mini"), "-r", os.environ.get("COPILOT_CLI_REASONING_EFFORT", "low"), "-p", prompt, "--allow-all-tools", "--disable-builtin-mcps"]
     ).returncode
 
 

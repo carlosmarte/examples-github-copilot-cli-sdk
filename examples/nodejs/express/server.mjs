@@ -18,7 +18,8 @@ import express from "express";
 import { CopilotClient, approveAll } from "@github/copilot-sdk";
 
 const PORT = Number(process.env.PORT) || 3000;
-const MODEL = process.env.COPILOT_MODEL || "gpt-4.1";
+const MODEL = process.env.COPILOT_CLI_MODEL || "gpt-5-mini";
+const REASONING_EFFORT = process.env.COPILOT_CLI_REASONING_EFFORT || "low";
 
 // Resolve the @github/copilot CLI relative to this script first, fall back to
 // the COPILOT_CLI_PATH env var. `--disable-builtin-mcps` keeps the example on
@@ -43,6 +44,7 @@ app.use(express.json());
 async function ask(prompt) {
   const session = await client.createSession({
     model: MODEL,
+    reasoningEffort: REASONING_EFFORT,
     onPermissionRequest: approveAll,
   });
   const response = await session.sendAndWait({ prompt });

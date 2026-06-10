@@ -40,7 +40,8 @@ def resolve_copilot_cli() -> str:
     )
 
 
-MODEL = os.environ.get("COPILOT_MODEL", "gpt-4.1")
+MODEL = os.environ.get("COPILOT_CLI_MODEL", "gpt-5-mini")
+REASONING_EFFORT = os.environ.get("COPILOT_CLI_REASONING_EFFORT", "low")
 DEFAULT_PROMPT = "What is 2 + 2?"
 
 
@@ -73,6 +74,7 @@ app = FastAPI(lifespan=lifespan)
 async def ask(client: CopilotClient, prompt: str) -> str:
     session = await client.create_session(
         model=MODEL,
+        reasoning_effort=REASONING_EFFORT,
         on_permission_request=PermissionHandler.approve_all,
     )
     reply = await session.send_and_wait(prompt)

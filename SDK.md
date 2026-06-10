@@ -75,6 +75,7 @@ Two events you'll subscribe to in practice:
 | Field        | Purpose                                                                   |
 | ------------ | ------------------------------------------------------------------------- |
 | `model`      | Model id (e.g. `"gpt-4.1"`, `"gpt-5"`, `"claude-sonnet"`)                  |
+| `reasoningEffort` | Reasoning depth for thinking models: `"low"` (default) / `"medium"` / `"high"` |
 | `streaming`  | `true` → emit `assistant.message_delta` events; `false`/omitted → buffered only |
 
 ### Lifecycle invariant

@@ -33,7 +33,7 @@ public class Main {
 
         ProcessBuilder pb = new ProcessBuilder(
             "copilot",
-            "-p", prompt,
+            "--model", System.getenv().getOrDefault("COPILOT_CLI_MODEL", "gpt-5-mini"), "-r", System.getenv().getOrDefault("COPILOT_CLI_REASONING_EFFORT", "low"), "-p", prompt,
             "--allow-all-tools",
             "--disable-builtin-mcps"
         );

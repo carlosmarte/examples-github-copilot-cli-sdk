@@ -23,7 +23,8 @@ await client.StartAsync();
 
 var session = await client.CreateSessionAsync(new SessionConfig
 {
-    Model = "gpt-4.1",
+    Model = Environment.GetEnvironmentVariable("COPILOT_CLI_MODEL") ?? "gpt-5-mini",
+    ReasoningEffort = Environment.GetEnvironmentVariable("COPILOT_CLI_REASONING_EFFORT") ?? "low",
     OnPermissionRequest = PermissionHandler.ApproveAll,
 });
 
