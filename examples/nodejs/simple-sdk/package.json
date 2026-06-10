@@ -1,0 +1,26 @@
+{
+  "name": "copilot-sdk-simple-examples",
+  "version": "0.1.0",
+  "description": "Core @github/copilot-sdk usage patterns — one standalone script per pattern.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "ex:hello": "node 01-hello-world.mjs",
+    "ex:multi-turn": "node 02-multi-turn-conversation.mjs",
+    "ex:streaming": "node 03-streaming-deltas.mjs",
+    "ex:explain": "node 04-explain-code-file.mjs",
+    "ex:commit-msg": "node 05-commit-message-from-diff.mjs",
+    "ex:graceful": "node 06-graceful-shutdown.mjs",
+    "ex:proxy": "node 07-https-proxy.mjs",
+    "ex:proxy-encode": "node 08-url-encoded-credentials.mjs",
+    "ex:proxy-preflight": "node 09-proxy-preflight.mjs",
+    "ex:proxy-required": "node 10-fail-fast-no-proxy-creds.mjs",
+    "ex:proxy-keychain": "node 11-keychain-proxy-creds.mjs"
+  },
+  "dependencies": {
+    "@github/copilot-sdk": "^0.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

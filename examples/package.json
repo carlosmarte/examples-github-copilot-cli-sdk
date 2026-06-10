@@ -1,0 +1,16 @@
+{
+  "name": "copilot-sdk-examples",
+  "version": "0.1.0",
+  "description": "Workspaces root for the Node.js @github/copilot-sdk examples. Non-Node examples (go, python, rust, java, dotnet, cli) build with their own toolchains.",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "nodejs/simple-sdk",
+    "nodejs/express",
+    "nodejs/fastify",
+    "nodejs/docker/api"
+  ],
+  "engines": {
+    "node": ">=20"
+  }
+}
