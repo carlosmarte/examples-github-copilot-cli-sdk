@@ -95,8 +95,6 @@ async function getCreds() {
 const { user, pass } = await getCreds();
 const proxyUrl =
   `http://${encodeURIComponent(user)}:${encodeURIComponent(pass)}@${PROXY_HOST}:${PROXY_PORT}`;
-process.env.HTTPS_PROXY = proxyUrl;
-process.env.HTTP_PROXY = proxyUrl;
 
 // Resolve the @github/copilot CLI relative to this script first, fall back to
 // the COPILOT_CLI_PATH env var. `--disable-builtin-mcps` keeps the example on
@@ -110,9 +108,13 @@ function resolveCopilotCli() {
   }
 }
 
+// Scope the proxy (with the Keychain-sourced password) to the spawned runtime
+// only. Keeping it out of this process's global env shrinks the blast radius:
+// nothing else in-process can read the password off process.env.
 const client = new CopilotClient({
   cliPath: resolveCopilotCli(),
   cliArgs: ["--disable-builtin-mcps"],
+  env: { ...process.env, HTTPS_PROXY: proxyUrl, HTTP_PROXY: proxyUrl },
 });
 const session = await client.createSession({
   model: process.env.COPILOT_CLI_MODEL || "gpt-5-mini",

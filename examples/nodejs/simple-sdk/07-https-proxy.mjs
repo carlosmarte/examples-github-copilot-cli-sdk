@@ -1,13 +1,17 @@
-// 07 — Route through an authenticated HTTPS proxy
+// 07 — Route through an authenticated HTTPS proxy (scoped, not global)
 //
 // `gh copilot` has no proxy-login command and will not prompt. The SDK shells
-// out to the Copilot CLI, which reads HTTPS_PROXY / HTTP_PROXY from the
+// out to the Copilot CLI, which reads HTTPS_PROXY / HTTP_PROXY from its
 // environment exactly like `gh` does. To authenticate, embed user:password in
-// the URL itself before opening the client.
+// the URL itself.
+//
+// Rather than mutating this process's global `process.env` (which would route
+// EVERY other HTTP client in this Node process through the proxy), pass the
+// proxy only to the spawned runtime via CopilotClient's `env` option. The
+// scope is the child process, so nothing else in-process is affected.
 //
 // Run:
 //   export HTTPS_PROXY="http://user:pass@proxy.example.com:8080"
-//   export HTTP_PROXY="http://user:pass@proxy.example.com:8080"
 //   node examples/simple-sdk/07-https-proxy.mjs
 
 import { createRequire } from "node:module";
@@ -38,6 +42,8 @@ function resolveCopilotCli() {
 const client = new CopilotClient({
   cliPath: resolveCopilotCli(),
   cliArgs: ["--disable-builtin-mcps"],
+  // Scope the proxy to the spawned runtime only — do not touch process.env.
+  env: { ...process.env, HTTPS_PROXY: proxy, HTTP_PROXY: proxy },
 });
 const session = await client.createSession({
   model: process.env.COPILOT_CLI_MODEL || "gpt-5-mini",

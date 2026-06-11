@@ -18,8 +18,9 @@
 import { createRequire } from "node:module";
 import { CopilotClient, approveAll } from "@github/copilot-sdk";
 
+const proxy = process.env.HTTPS_PROXY ?? process.env.HTTP_PROXY;
+
 if (process.env.REQUIRE_PROXY === "1") {
-  const proxy = process.env.HTTPS_PROXY ?? process.env.HTTP_PROXY;
   if (!proxy) {
     console.error("REQUIRE_PROXY=1 but neither HTTPS_PROXY nor HTTP_PROXY is set.");
     console.error('export HTTPS_PROXY="http://user:pass@proxy.example.com:8080"');
@@ -45,9 +46,12 @@ function resolveCopilotCli() {
   }
 }
 
+// Hand the proxy to the spawned runtime via config — scoped to the child
+// process, never written to this process's global env.
 const client = new CopilotClient({
   cliPath: resolveCopilotCli(),
   cliArgs: ["--disable-builtin-mcps"],
+  env: proxy ? { ...process.env, HTTPS_PROXY: proxy, HTTP_PROXY: proxy } : process.env,
 });
 const session = await client.createSession({
   model: process.env.COPILOT_CLI_MODEL || "gpt-5-mini",

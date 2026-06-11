@@ -48,9 +48,13 @@ function resolveCopilotCli() {
   }
 }
 
+// Pass the proxy to the spawned runtime via config rather than relying on
+// (or mutating) this process's global env. When no proxy is set, the runtime
+// inherits process.env unchanged and connects directly.
 const client = new CopilotClient({
   cliPath: resolveCopilotCli(),
   cliArgs: ["--disable-builtin-mcps"],
+  env: proxy ? { ...process.env, HTTPS_PROXY: proxy, HTTP_PROXY: proxy } : process.env,
 });
 const session = await client.createSession({
   model: process.env.COPILOT_CLI_MODEL || "gpt-5-mini",

@@ -6,7 +6,10 @@
 // connecting to whatever string trails it as if it were the proxy host.
 //
 // This script takes raw user/pass from env vars, encodes them, builds the
-// proxy URL, sanity-checks the parse, and exports it for the SDK to inherit.
+// proxy URL, sanity-checks the parse, and passes it to the SDK via the
+// CopilotClient `env` option — scoped to the spawned runtime, NOT assigned to
+// this process's global `process.env` (which would affect every other HTTP
+// client in the process).
 //
 // Run:
 //   PROXY_USER="me" PROXY_PASS='p@ss:w#rd' \
@@ -37,9 +40,6 @@ if (parsed.hostname !== PROXY_HOST) {
   process.exit(1);
 }
 
-process.env.HTTPS_PROXY = proxyUrl;
-process.env.HTTP_PROXY = proxyUrl;
-
 // Resolve the @github/copilot CLI relative to this script first, fall back to
 // the COPILOT_CLI_PATH env var. `--disable-builtin-mcps` keeps the example on
 // the bare SDK surface; the env var COPILOT_DISABLE_MCP is not honored.
@@ -55,6 +55,8 @@ function resolveCopilotCli() {
 const client = new CopilotClient({
   cliPath: resolveCopilotCli(),
   cliArgs: ["--disable-builtin-mcps"],
+  // Scope the proxy to the spawned runtime only — do not touch process.env.
+  env: { ...process.env, HTTPS_PROXY: proxyUrl, HTTP_PROXY: proxyUrl },
 });
 const session = await client.createSession({
   model: process.env.COPILOT_CLI_MODEL || "gpt-5-mini",

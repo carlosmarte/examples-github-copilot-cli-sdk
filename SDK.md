@@ -264,22 +264,39 @@ await shutdown(0);
 
 `copilot` (and the SDK that wraps it) reads the standard `HTTPS_PROXY` /
 `HTTP_PROXY` env vars but does **not** have a built-in `copilot proxy login`
-command — credentials must be embedded in the URL. The
-[`examples/nodejs/simple-sdk/`](examples/nodejs/simple-sdk/) directory ships
+command — credentials must be embedded in the URL.
+
+Each example passes the proxy to the spawned runtime through `CopilotClient`'s
+`env` option — **not** by assigning `process.env.HTTPS_PROXY` in the parent
+process. Mutating the global env would silently route *every* HTTP client in
+the Node process through the proxy; the `env` option keeps the proxy scoped to
+the Copilot child process only:
+
+```typescript
+const proxy = "http://user:pass@proxy.example.com:8080";
+const client = new CopilotClient({
+  // proxy reaches only this spawned runtime, not the rest of the process
+  env: { ...process.env, HTTPS_PROXY: proxy, HTTP_PROXY: proxy },
+});
+```
+
+The [`examples/nodejs/simple-sdk/`](examples/nodejs/simple-sdk/) directory ships
 five worked configurations:
 
 | # | Script                                | What it shows                                                                 |
 | - | ------------------------------------- | ----------------------------------------------------------------------------- |
-| 7 | `07-https-proxy.mjs`                  | Read `HTTPS_PROXY` with embedded `user:pass`; log the host/port               |
+| 7 | `07-https-proxy.mjs`                  | Read `HTTPS_PROXY` with embedded `user:pass`; pass it via the client `env` option |
 | 8 | `08-url-encoded-credentials.mjs`      | URL-encode passwords containing `@`, `:`, `#`, `/`; sanity-check the parse    |
 | 9 | `09-proxy-preflight.mjs`              | TCP-probe the proxy with a 3s timeout before opening the SDK                  |
 | 10 | `10-fail-fast-no-proxy-creds.mjs`     | When `REQUIRE_PROXY=1`, refuse to start unless the URL contains user:pass     |
 | 11 | `11-keychain-proxy-creds.mjs`         | macOS only: read proxy creds from the login Keychain (service `copilot-sdk-proxy`) |
 
-> **Security note.** Embedding `user:password` in `HTTPS_PROXY` exposes the
-> password as plain text in the process environment. Anything that can read
-> `/proc/<pid>/environ` (Linux) or list env vars for your user can see it.
-> Example 11 keeps it in the Keychain instead — recommended for any host
+> **Security note.** Embedding `user:password` in a proxy URL exposes the
+> password as plain text in the *child* process's environment. Anything that
+> can read `/proc/<pid>/environ` (Linux) or list env vars for that process can
+> see it. Scoping it via the client `env` option (rather than the parent's
+> `process.env`) limits the blast radius to the one spawned runtime. Example 11
+> additionally keeps the secret in the Keychain — recommended for any host
 > where untrusted processes might run as your user.
 
 ---
